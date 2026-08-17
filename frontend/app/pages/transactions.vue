@@ -250,6 +250,94 @@
             </div>
           </div>
         </div>
+
+        <!-- Pagination Footer Controls -->
+        <div v-if="!pending && transactions.length > 0" class="p-4 sm:p-5 bg-slate-950/40 border-t border-slate-800/80 flex flex-col md:flex-row items-center justify-between gap-4">
+          <!-- Showing Info & Per Page selector -->
+          <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3 text-xs text-slate-400">
+            <span>
+              Menampilkan <strong class="text-white font-mono font-semibold">{{ pagination.from }}</strong> - <strong class="text-white font-mono font-semibold">{{ pagination.to }}</strong> dari <strong class="text-white font-mono font-semibold">{{ pagination.total }}</strong> transaksi
+            </span>
+            <div class="flex items-center gap-2 pl-0 sm:pl-3 border-l-0 sm:border-l border-slate-800">
+              <span class="text-slate-500">Per halaman:</span>
+              <select 
+                v-model.number="pagination.perPage"
+                @change="changePerPage(pagination.perPage)"
+                class="px-2.5 py-1 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition font-mono cursor-pointer"
+              >
+                <option :value="5">5</option>
+                <option :value="10">10</option>
+                <option :value="25">25</option>
+                <option :value="50">50</option>
+                <option :value="100">100</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Page Navigation Buttons -->
+          <div class="flex items-center gap-1.5 self-center md:self-auto">
+            <!-- First Page Button -->
+            <button 
+              @click="changePage(1)"
+              :disabled="pagination.currentPage <= 1"
+              class="p-2 rounded-xl border border-slate-800/80 bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition active:scale-95"
+              title="Halaman Pertama"
+            >
+              <ChevronsLeft class="w-4 h-4" />
+            </button>
+
+            <!-- Prev Page Button -->
+            <button 
+              @click="changePage(pagination.currentPage - 1)"
+              :disabled="pagination.currentPage <= 1"
+              class="p-2 rounded-xl border border-slate-800/80 bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition active:scale-95 flex items-center gap-1 text-xs"
+              title="Halaman Sebelumnya"
+            >
+              <ChevronLeft class="w-4 h-4" />
+              <span class="hidden sm:inline">Prev</span>
+            </button>
+
+            <!-- Numbered Page Buttons -->
+            <div class="flex items-center gap-1 px-1">
+              <template v-for="(p, idx) in displayedPages" :key="idx">
+                <span v-if="p === '...'" class="px-2 py-1 text-slate-600 text-xs font-mono">...</span>
+                <button 
+                  v-else
+                  @click="changePage(p)"
+                  :class="[
+                    'w-8 h-8 rounded-xl font-bold text-xs transition active:scale-95 flex items-center justify-center font-mono',
+                    p === pagination.currentPage
+                      ? 'bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-md shadow-indigo-600/30 font-extrabold'
+                      : 'border border-slate-800/80 bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-white'
+                  ]"
+                >
+                  {{ p }}
+                </button>
+              </template>
+            </div>
+
+            <!-- Next Page Button -->
+            <button 
+              @click="changePage(pagination.currentPage + 1)"
+              :disabled="pagination.currentPage >= pagination.lastPage"
+              class="p-2 rounded-xl border border-slate-800/80 bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition active:scale-95 flex items-center gap-1 text-xs"
+              title="Halaman Berikutnya"
+            >
+              <span class="hidden sm:inline">Next</span>
+              <ChevronRight class="w-4 h-4" />
+            </button>
+
+            <!-- Last Page Button -->
+            <button 
+              @click="changePage(pagination.lastPage)"
+              :disabled="pagination.currentPage >= pagination.lastPage"
+              class="p-2 rounded-xl border border-slate-800/80 bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition active:scale-95"
+              title="Halaman Terakhir"
+            >
+              <ChevronsRight class="w-4 h-4" />
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -387,7 +475,11 @@ import {
   X, 
   RotateCcw, 
   Receipt, 
-  Loader2 
+  Loader2,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight
 } from 'lucide-vue-next'
 
 const { fetchApi } = useApi()
@@ -396,6 +488,21 @@ const coaStore = useCoaStore()
 
 const transactions = ref([])
 const pending = ref(true)
+
+const pagination = ref({
+  currentPage: 1,
+  lastPage: 1,
+  perPage: 10,
+  total: 0,
+  from: 0,
+  to: 0
+})
+
+const summary = ref({
+  totalDebit: 0,
+  totalCredit: 0,
+  net: 0
+})
 
 const filters = ref({
   search: '',
@@ -416,7 +523,8 @@ let debounceTimer = null
 const debounceLoad = () => {
   clearTimeout(debounceTimer)
   debounceTimer = setTimeout(() => {
-    loadTransactions()
+    pagination.value.currentPage = 1
+    loadTransactions(1)
   }, 300)
 }
 
@@ -430,39 +538,106 @@ const form = ref({
 })
 
 const totalFilteredDebit = computed(() => {
-  return transactions.value.reduce((sum, tx) => sum + Number(tx.debit || 0), 0)
+  return summary.value.totalDebit
 })
 
 const totalFilteredCredit = computed(() => {
-  return transactions.value.reduce((sum, tx) => sum + Number(tx.credit || 0), 0)
+  return summary.value.totalCredit
 })
 
 const netFiltered = computed(() => {
-  return totalFilteredCredit.value - totalFilteredDebit.value
+  return summary.value.net
 })
 
-const loadTransactions = async () => {
+const displayedPages = computed(() => {
+  const current = pagination.value.currentPage
+  const last = pagination.value.lastPage
+  const delta = 2
+  const range = []
+  const rangeWithDots = []
+  let l
+
+  for (let i = 1; i <= last; i++) {
+    if (i === 1 || i === last || (i >= current - delta && i <= current + delta)) {
+      range.push(i)
+    }
+  }
+
+  for (const i of range) {
+    if (l) {
+      if (i - l === 2) {
+        rangeWithDots.push(l + 1)
+      } else if (i - l !== 1) {
+        rangeWithDots.push('...')
+      }
+    }
+    rangeWithDots.push(i)
+    l = i
+  }
+
+  return rangeWithDots
+})
+
+const loadTransactions = async (page = null) => {
   pending.value = true
+  if (page !== null) {
+    pagination.value.currentPage = page
+  }
+
   const query = new URLSearchParams()
+  query.append('page', String(pagination.value.currentPage))
+  query.append('per_page', String(pagination.value.perPage))
+
   if (filters.value.search) query.append('search', filters.value.search)
   if (filters.value.coa_id) query.append('coa_id', filters.value.coa_id)
   if (filters.value.start_date) query.append('start_date', filters.value.start_date)
   if (filters.value.end_date) query.append('end_date', filters.value.end_date)
 
   const res = await fetchApi(`/transactions?${query.toString()}`)
-  if (res.data) transactions.value = res.data
+  if (res.data) {
+    if (res.data.data !== undefined) {
+      transactions.value = res.data.data
+      pagination.value.currentPage = res.data.current_page || 1
+      pagination.value.lastPage = res.data.last_page || 1
+      pagination.value.total = res.data.total || 0
+      pagination.value.from = res.data.from || (transactions.value.length > 0 ? 1 : 0)
+      pagination.value.to = res.data.to || transactions.value.length
+      if (res.data.summary) {
+        summary.value.totalDebit = Number(res.data.summary.total_debit || 0)
+        summary.value.totalCredit = Number(res.data.summary.total_credit || 0)
+        summary.value.net = Number(res.data.summary.net || 0)
+      }
+    } else if (Array.isArray(res.data)) {
+      transactions.value = res.data
+      pagination.value.total = res.data.length
+      pagination.value.from = res.data.length > 0 ? 1 : 0
+      pagination.value.to = res.data.length
+      pagination.value.currentPage = 1
+      pagination.value.lastPage = 1
+      summary.value.totalDebit = transactions.value.reduce((sum, tx) => sum + Number(tx.debit || 0), 0)
+      summary.value.totalCredit = transactions.value.reduce((sum, tx) => sum + Number(tx.credit || 0), 0)
+      summary.value.net = summary.value.totalCredit - summary.value.totalDebit
+    }
+  }
   if (res.error) toast.error(res.error, 'Gagal memuat transaksi')
   pending.value = false
 }
 
-const loadCoas = async () => {
-  const res = await fetchApi('/coas')
-  if (res.data) coas.value = res.data
+const changePage = (page) => {
+  if (page < 1 || page > pagination.value.lastPage || page === pagination.value.currentPage) return
+  loadTransactions(page)
+}
+
+const changePerPage = (perPage) => {
+  pagination.value.perPage = perPage
+  pagination.value.currentPage = 1
+  loadTransactions(1)
 }
 
 const resetFilters = () => {
   filters.value = { search: '', coa_id: '', start_date: '', end_date: '' }
-  loadTransactions()
+  pagination.value.currentPage = 1
+  loadTransactions(1)
 }
 
 const onCoaChange = () => {
@@ -533,7 +708,7 @@ const saveTransaction = async () => {
     if (res.data) {
       toast.success('Transaksi keuangan berhasil ditambahkan')
       showModal.value = false
-      await loadTransactions()
+      await loadTransactions(1)
     } else {
       toast.error(res.error || 'Gagal menambahkan transaksi')
     }
