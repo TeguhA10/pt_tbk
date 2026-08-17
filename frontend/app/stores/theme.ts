@@ -32,7 +32,6 @@ export const useThemeStore = defineStore('theme', () => {
     theme.value = t
   }
 
-  // Reaksi otomatis: setiap kali theme berubah → update DOM + localStorage
   watch(theme, (t) => {
     applyTheme(t)
     if (typeof localStorage !== 'undefined') {
