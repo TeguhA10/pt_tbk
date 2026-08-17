@@ -5,7 +5,7 @@ export default defineNuxtConfig({
   experimental: {
     appManifest: false,
   },
-  modules: ['@nuxtjs/tailwindcss'],
+  modules: ['@nuxtjs/tailwindcss', '@pinia/nuxt'],
   css: ['~/assets/css/main.css'],
   tailwindcss: {
     configPath: '~/tailwind.config.js',

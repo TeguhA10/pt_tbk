@@ -13,7 +13,6 @@ export default defineNuxtPlugin((nuxtApp) => {
     }
   })
 
-  // Request interceptor
   axiosInstance.interceptors.request.use(
     (requestConfig) => {
       return requestConfig
@@ -23,7 +22,6 @@ export default defineNuxtPlugin((nuxtApp) => {
     }
   )
 
-  // Response interceptor
   axiosInstance.interceptors.response.use(
     (response) => response,
     (error) => {

@@ -26,7 +26,7 @@
       <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center justify-between">
         <div>
           <p class="text-xs font-bold text-slate-400 uppercase">Total Akun COA</p>
-          <p class="text-xl font-extrabold text-white mt-1">{{ coas.length }}</p>
+          <p class="text-xl font-extrabold text-white mt-1">{{ coaStore.coas.length }}</p>
         </div>
         <div class="w-9 h-9 rounded-xl bg-slate-800 flex items-center justify-center text-slate-300">
           <Layers class="w-4 h-4" />
@@ -35,7 +35,7 @@
       <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center justify-between">
         <div>
           <p class="text-xs font-bold text-slate-400 uppercase">Akun Pendapatan</p>
-          <p class="text-xl font-extrabold text-emerald-400 mt-1">{{ incomeCoasCount }}</p>
+          <p class="text-xl font-extrabold text-emerald-400 mt-1">{{ coaStore.incomeCount }}</p>
         </div>
         <div class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
           <ArrowDownRight class="w-4 h-4" />
@@ -44,7 +44,7 @@
       <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center justify-between">
         <div>
           <p class="text-xs font-bold text-slate-400 uppercase">Akun Pengeluaran</p>
-          <p class="text-xl font-extrabold text-rose-400 mt-1">{{ expenseCoasCount }}</p>
+          <p class="text-xl font-extrabold text-rose-400 mt-1">{{ coaStore.expenseCount }}</p>
         </div>
         <div class="w-9 h-9 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center">
           <ArrowUpRight class="w-4 h-4" />
@@ -79,7 +79,7 @@
           class="px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/40 transition"
         >
           <option value="">Semua Kategori</option>
-          <option v-for="cat in categories" :key="cat.id" :value="cat.id">
+          <option v-for="cat in coaStore.categories" :key="cat.id" :value="cat.id">
             {{ cat.name }} ({{ cat.type }})
           </option>
         </select>
@@ -93,13 +93,13 @@
     <!-- COA Data Container -->
     <div class="bg-slate-900/80 rounded-3xl border border-slate-800 shadow-xl overflow-hidden">
       <!-- Loading state -->
-      <div v-if="pending" class="p-16 text-center text-slate-400 text-xs flex flex-col items-center justify-center gap-3 animate-pulse">
+      <div v-if="coaStore.loading" class="p-16 text-center text-slate-400 text-xs flex flex-col items-center justify-center gap-3 animate-pulse">
         <Loader2 class="w-6 h-6 animate-spin text-indigo-400" />
         <span>Memuat data Master COA...</span>
       </div>
 
       <!-- Empty state -->
-      <div v-else-if="filteredCoas.length === 0" class="p-16 text-center text-slate-400 text-xs flex flex-col items-center justify-center gap-3">
+      <div v-else-if="!coaStore.loading && filteredCoas.length === 0" class="p-16 text-center text-slate-400 text-xs flex flex-col items-center justify-center gap-3">
         <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center text-slate-500">
           <BookOpen class="w-6 h-6" />
         </div>
@@ -115,7 +115,7 @@
       </div>
 
       <!-- Data List -->
-      <div v-else>
+      <div v-else-if="!coaStore.loading">
         <!-- Desktop Table View -->
         <div class="hidden md:block overflow-x-auto">
           <table class="w-full text-left text-xs">
@@ -272,7 +272,7 @@
                 class="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
               >
                 <option :value="null" disabled>Pilih Kategori...</option>
-                <option v-for="cat in categories" :key="cat.id" :value="cat.id">
+                <option v-for="cat in coaStore.categories" :key="cat.id" :value="cat.id">
                   {{ cat.name }} ({{ cat.type }})
                 </option>
               </select>
@@ -330,10 +330,8 @@ import {
 
 const { fetchApi } = useApi()
 const toast = useToast()
+const coaStore = useCoaStore()
 
-const coas = ref([])
-const categories = ref([])
-const pending = ref(true)
 const searchQuery = ref('')
 const categoryFilter = ref('')
 
@@ -352,28 +350,8 @@ const form = ref({
   category_id: null
 })
 
-const incomeCoasCount = computed(() => {
-  return coas.value.filter(c => c.category?.type === 'income').length
-})
-
-const expenseCoasCount = computed(() => {
-  return coas.value.filter(c => c.category?.type === 'expense').length
-})
-
-const loadData = async () => {
-  pending.value = true
-  const [resCoas, resCats] = await Promise.all([
-    fetchApi('/coas'),
-    fetchApi('/categories')
-  ])
-  if (resCoas.data) coas.value = resCoas.data
-  if (resCats.data) categories.value = resCats.data
-  if (resCoas.error) toast.error(resCoas.error, 'Gagal memuat data COA')
-  pending.value = false
-}
-
 const filteredCoas = computed(() => {
-  let list = coas.value
+  let list = coaStore.coas
 
   if (categoryFilter.value) {
     list = list.filter(c => c.category_id == categoryFilter.value)
@@ -389,7 +367,7 @@ const filteredCoas = computed(() => {
 
 const openAddModal = () => {
   isEditing.value = false
-  form.value = { id: null, code: '', name: '', category_id: categories.value[0]?.id || null }
+  form.value = { id: null, code: '', name: '', category_id: coaStore.categories[0]?.id || null }
   showModal.value = true
 }
 
@@ -414,7 +392,7 @@ const saveCoa = async () => {
     if (res.data) {
       toast.success(`Akun COA "${form.value.code} - ${form.value.name}" berhasil diperbarui`)
       showModal.value = false
-      await loadData()
+      await coaStore.refresh()
     } else {
       toast.error(res.error || 'Gagal memperbarui COA')
     }
@@ -426,7 +404,7 @@ const saveCoa = async () => {
     if (res.data) {
       toast.success(`Akun COA "${form.value.code} - ${form.value.name}" berhasil ditambahkan`)
       showModal.value = false
-      await loadData()
+      await coaStore.refresh()
     } else {
       toast.error(res.error || 'Gagal menambahkan COA')
     }
@@ -446,7 +424,7 @@ const executeDelete = async () => {
   if (!res.error) {
     toast.success(`Akun COA "${coaToDelete.value.code} - ${coaToDelete.value.name}" telah dihapus`)
     showDeleteModal.value = false
-    await loadData()
+    await coaStore.refresh()
   } else {
     toast.error(res.error || 'Gagal menghapus COA')
   }
@@ -454,6 +432,6 @@ const executeDelete = async () => {
 }
 
 onMounted(() => {
-  loadData()
+  coaStore.fetchAll()
 })
 </script>

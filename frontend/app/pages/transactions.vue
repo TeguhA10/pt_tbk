@@ -50,7 +50,7 @@
           class="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/40 transition"
         >
           <option value="">Semua Akun COA</option>
-          <option v-for="c in coas" :key="c.id" :value="c.id">{{ c.code }} - {{ c.name }}</option>
+          <option v-for="c in coaStore.coas" :key="c.id" :value="c.id">{{ c.code }} - {{ c.name }}</option>
         </select>
 
         <!-- Date Range Filter -->
@@ -289,7 +289,7 @@
                   class="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500 transition"
                 >
                   <option :value="null" disabled>Pilih COA...</option>
-                  <option v-for="c in coas" :key="c.id" :value="c.id">
+                  <option v-for="c in coaStore.coas" :key="c.id" :value="c.id">
                     {{ c.code }} - {{ c.name }} ({{ c.category?.name }})
                   </option>
                 </select>
@@ -392,9 +392,9 @@ import {
 
 const { fetchApi } = useApi()
 const toast = useToast()
+const coaStore = useCoaStore()
 
 const transactions = ref([])
-const coas = ref([])
 const pending = ref(true)
 
 const filters = ref({
@@ -466,7 +466,7 @@ const resetFilters = () => {
 }
 
 const onCoaChange = () => {
-  const selected = coas.value.find(c => c.id === form.value.coa_id)
+  const selected = coaStore.coas.find(c => c.id === form.value.coa_id)
   if (selected?.category?.type === 'income' && form.value.debit > 0 && form.value.credit === 0) {
     form.value.credit = form.value.debit
     form.value.debit = 0
@@ -481,7 +481,7 @@ const openAddModal = () => {
   form.value = {
     id: null,
     date: new Date().toISOString().split('T')[0],
-    coa_id: coas.value[0]?.id || null,
+    coa_id: coaStore.coas[0]?.id || null,
     description: '',
     debit: 0,
     credit: 0
@@ -561,7 +561,7 @@ const executeDelete = async () => {
 }
 
 onMounted(async () => {
-  await loadCoas()
+  await coaStore.fetchAll()
   await loadTransactions()
 })
 </script>

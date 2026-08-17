@@ -16,7 +16,6 @@ export const useApi = () => {
       }
     })
 
-    // Request interceptor
     axiosInstance.interceptors.request.use(
       (requestConfig) => {
         return requestConfig
@@ -26,7 +25,6 @@ export const useApi = () => {
       }
     )
 
-    // Response interceptor
     axiosInstance.interceptors.response.use(
       (response) => response,
       (error) => {
@@ -36,9 +34,6 @@ export const useApi = () => {
     )
   }
 
-  /**
-   * Helper wrapper for Axios requests returning { data, error }
-   */
   const fetchApi = async <T = any>(endpoint: string, options: any = {}) => {
     try {
       const { body, ...restOptions } = options
