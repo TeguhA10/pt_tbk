@@ -5,10 +5,11 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org)
 [![Nuxt](https://img.shields.io/badge/Nuxt-4.x-00DC82?style=for-the-badge&logo=nuxtdotjs&logoColor=white)](https://nuxt.com)
 [![Vue.js](https://img.shields.io/badge/Vue.js-3.5-4FC08D?style=for-the-badge&logo=vuedotjs&logoColor=white)](https://vuejs.org)
+[![Pinia](https://img.shields.io/badge/Pinia-2.x-ffd859?style=for-the-badge&logo=vuedotjs&logoColor=black)](https://pinia.vuejs.org)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
 [![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com)
 
-Sistem Informasi Manajemen Keuangan dan Pelaporan Laba Rugi (*Profit and Loss Statement*) terpadu untuk **PT. Trans Berjaya Khatulistiwa**. Dibangun dengan arsitektur modern berbasis RESTful API (Laravel + PostgreSQL) dan antarmuka web SPA/SSR yang responsif, elegan, dan interaktif (Nuxt + Tailwind CSS).
+Sistem Informasi Manajemen Keuangan dan Pelaporan Laba Rugi (*Profit and Loss Statement*) terpadu untuk **PT. Trans Berjaya Khatulistiwa**. Dibangun dengan arsitektur modern berbasis RESTful API (Laravel + PostgreSQL) dan antarmuka web SPA/SSR yang responsif, elegan, dan interaktif (Nuxt + Pinia + Tailwind CSS).
 
 ---
 
@@ -34,8 +35,14 @@ Sistem Informasi Manajemen Keuangan dan Pelaporan Laba Rugi (*Profit and Loss St
   - Rekapitulasi matriks pendapatan vs biaya operasional per bulan (Q1 2022).
   - *Sticky Category Column*: Kolom nama kategori tetap terkunci di sisi kiri saat digeser horizontal pada layar HP / tablet.
   - Fitur **Export Excel (.xlsx / .csv)** dan **Cetak PDF**.
+- **⚡ State Management & Caching (Pinia)**:
+  - **`useCoaStore`**: Sentralisasi data COA & Kategori dengan mekanisme *smart-caching*, mencegah redudansi *API request* antar navigasi halaman.
+  - **`useThemeStore`**: Pengelolaan state tema reaktif dengan *localStorage persistence*.
+- **🌓 Mode Gelap & Mode Terang (Dark / Light Mode)**:
+  - Pengalihan tema instan (Dark / Light) dengan transisi visual halus.
+  - Persistensi preferensi tema tersimpan otomatis di *localStorage*.
 - **💎 UI/UX & Desain Responsif**:
-  - Desain *Dark Glassmorphism* modern dengan tipografi *Plus Jakarta Sans*.
+  - Desain *Dark/Light Glassmorphism* modern dengan tipografi *Plus Jakarta Sans*.
   - *Floating Toast Notification System* & Modal konfirmasi kustom.
   - 100% responsif (tampilan tabel di desktop dan kartu interaktif di mobile).
 
@@ -53,11 +60,12 @@ PT. Trans Berjaya Khatulistiwa/
 │   └── docker-entrypoint.sh  # Auto DB wait, migration & seeder runner
 ├── frontend/                 # Nuxt 4 Frontend Web Application
 │   ├── app/
-│   │   ├── assets/css/       # Custom scrollbars, glass tokens, Tailwind
+│   │   ├── assets/css/       # Custom scrollbars, glass tokens, Dark/Light CSS
 │   │   ├── components/       # AppToast, AppConfirmModal
 │   │   ├── composables/      # useApi, useToast, formatRupiah
-│   │   ├── layouts/          # Responsive Sidebar & Topbar Header
-│   │   └── pages/            # Dashboard, Categories, COAs, Transactions, Reports
+│   │   ├── layouts/          # Responsive Sidebar & Topbar Header (Theme Toggle)
+│   │   ├── pages/            # Dashboard, Categories, COAs, Transactions, Reports
+│   │   └── stores/           # Pinia Stores (coa.ts, theme.ts)
 │   ├── Dockerfile            # Node.js 20 & Nuxt runner
 │   └── nuxt.config.ts        # Nuxt Configuration
 ├── docker-compose.yml        # Orchestration (PostgreSQL + Backend + Frontend)
