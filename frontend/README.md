@@ -7,6 +7,7 @@ Aplikasi antarmuka web modern untuk Sistem Manajemen Keuangan dan Laporan Laba R
 - **Framework**: Nuxt 4.x / Vue 3.5
 - **State Management**: Pinia (`@pinia/nuxt`)
   - `useCoaStore`: Caching data master COA & Kategori untuk efisiensi API call
+  - `useTransactionStore`: Pengelolaan state transaksi, pagination dinamis, multi-filter, dan metrik keuangan
   - `useThemeStore`: Pengelolaan tema Dark/Light mode dengan persistensi `localStorage`
 - **Styling & Theme**: Tailwind CSS 3.4 (`darkMode: 'class'`) & Custom Glassmorphism CSS
 - **Icons**: Lucide Vue Next

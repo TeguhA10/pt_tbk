@@ -37,6 +37,7 @@ Sistem Informasi Manajemen Keuangan dan Pelaporan Laba Rugi (*Profit and Loss St
   - Fitur **Export Excel (.xlsx / .csv)** dan **Cetak PDF**.
 - **⚡ State Management & Caching (Pinia)**:
   - **`useCoaStore`**: Sentralisasi data COA & Kategori dengan mekanisme *smart-caching*, mencegah redudansi *API request* antar navigasi halaman.
+  - **`useTransactionStore`**: Sentralisasi transaksi keuangan, kontrol pagination, filter reaktif, dan ringkasan kalkulasi metrik.
   - **`useThemeStore`**: Pengelolaan state tema reaktif dengan *localStorage persistence*.
 - **🌓 Mode Gelap & Mode Terang (Dark / Light Mode)**:
   - Pengalihan tema instan (Dark / Light) dengan transisi visual halus.
@@ -65,7 +66,7 @@ PT. Trans Berjaya Khatulistiwa/
 │   │   ├── composables/      # useApi, useToast, formatRupiah
 │   │   ├── layouts/          # Responsive Sidebar & Topbar Header (Theme Toggle)
 │   │   ├── pages/            # Dashboard, Categories, COAs, Transactions, Reports
-│   │   └── stores/           # Pinia Stores (coa.ts, theme.ts)
+│   │   └── stores/           # Pinia Stores (coa.ts, transaction.ts, theme.ts)
 │   ├── Dockerfile            # Node.js 20 & Nuxt runner
 │   └── nuxt.config.ts        # Nuxt Configuration
 ├── docker-compose.yml        # Orchestration (PostgreSQL + Backend + Frontend)

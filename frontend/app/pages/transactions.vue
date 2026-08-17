@@ -28,15 +28,15 @@
         <div class="relative">
           <Search class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input 
-            v-model="filters.search" 
+            v-model="txStore.filters.search" 
             @input="debounceLoad"
             type="text" 
             placeholder="Cari deskripsi / COA..." 
             class="w-full pl-10 pr-9 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/40 transition"
           />
           <button 
-            v-if="filters.search" 
-            @click="filters.search = ''; loadTransactions()" 
+            v-if="txStore.filters.search" 
+            @click="txStore.filters.search = ''; txStore.fetchTransactions(1)" 
             class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
           >
             <X class="w-3.5 h-3.5" />
@@ -45,8 +45,8 @@
 
         <!-- COA Selector -->
         <select 
-          v-model="filters.coa_id" 
-          @change="loadTransactions"
+          v-model="txStore.filters.coa_id" 
+          @change="txStore.fetchTransactions(1)"
           class="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/40 transition"
         >
           <option value="">Semua Akun COA</option>
@@ -57,8 +57,8 @@
         <div class="flex items-center gap-2 sm:col-span-2 lg:col-span-2">
           <div class="relative flex-1">
             <input 
-              v-model="filters.start_date" 
-              @change="loadTransactions"
+              v-model="txStore.filters.start_date" 
+              @change="txStore.fetchTransactions(1)"
               type="date" 
               class="w-full px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition"
             />
@@ -66,14 +66,14 @@
           <span class="text-xs text-slate-500 font-semibold shrink-0">s/d</span>
           <div class="relative flex-1">
             <input 
-              v-model="filters.end_date" 
-              @change="loadTransactions"
+              v-model="txStore.filters.end_date" 
+              @change="txStore.fetchTransactions(1)"
               type="date" 
               class="w-full px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition"
             />
           </div>
           <button 
-            @click="resetFilters" 
+            @click="txStore.resetFilters()" 
             class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition active:scale-95 shrink-0 flex items-center gap-1.5 text-xs font-semibold px-3"
             title="Reset Filter"
           >
@@ -89,22 +89,22 @@
           <div class="flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-rose-400"></span>
             <span class="text-slate-400">Total Debit (Expense):</span>
-            <strong class="text-rose-400 font-mono font-bold">{{ formatRupiah(totalFilteredDebit) }}</strong>
+            <strong class="text-rose-400 font-mono font-bold">{{ formatRupiah(txStore.totalFilteredDebit) }}</strong>
           </div>
           <div class="flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
             <span class="text-slate-400">Total Credit (Income):</span>
-            <strong class="text-emerald-400 font-mono font-bold">{{ formatRupiah(totalFilteredCredit) }}</strong>
+            <strong class="text-emerald-400 font-mono font-bold">{{ formatRupiah(txStore.totalFilteredCredit) }}</strong>
           </div>
           <div class="flex items-center gap-2">
             <span class="text-slate-400">Selisih Bersih:</span>
-            <strong :class="['font-mono font-bold', netFiltered >= 0 ? 'text-emerald-400' : 'text-rose-400']">
-              {{ formatRupiah(netFiltered) }}
+            <strong :class="['font-mono font-bold', txStore.netFiltered >= 0 ? 'text-emerald-400' : 'text-rose-400']">
+              {{ formatRupiah(txStore.netFiltered) }}
             </strong>
           </div>
         </div>
         <span class="text-slate-400 font-medium font-mono text-xs">
-          {{ transactions.length }} Transaksi
+          {{ txStore.pagination.total }} Transaksi
         </span>
       </div>
     </div>
@@ -112,13 +112,13 @@
     <!-- Transactions Data Container -->
     <div class="bg-slate-900/80 rounded-3xl border border-slate-800 shadow-xl overflow-hidden">
       <!-- Loading state -->
-      <div v-if="pending" class="p-16 text-center text-slate-400 text-xs flex flex-col items-center justify-center gap-3 animate-pulse">
+      <div v-if="txStore.loading" class="p-16 text-center text-slate-400 text-xs flex flex-col items-center justify-center gap-3 animate-pulse">
         <Loader2 class="w-6 h-6 animate-spin text-indigo-400" />
         <span>Memuat data transaksi keuangan...</span>
       </div>
 
       <!-- Empty state -->
-      <div v-else-if="transactions.length === 0" class="p-16 text-center text-slate-400 text-xs flex flex-col items-center justify-center gap-3">
+      <div v-else-if="txStore.transactions.length === 0" class="p-16 text-center text-slate-400 text-xs flex flex-col items-center justify-center gap-3">
         <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center text-slate-500">
           <Receipt class="w-6 h-6" />
         </div>
@@ -150,7 +150,7 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-800/60 font-medium">
-              <tr v-for="tx in transactions" :key="tx.id" class="hover:bg-slate-800/40 transition group">
+              <tr v-for="tx in txStore.transactions" :key="tx.id" class="hover:bg-slate-800/40 transition group">
                 <td class="py-4 px-6 text-slate-300 font-mono whitespace-nowrap">{{ tx.date }}</td>
                 <td class="py-4 px-6 font-mono text-indigo-400 font-bold text-sm whitespace-nowrap">
                   <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-indigo-500/10 border border-indigo-500/25">
@@ -203,7 +203,7 @@
         <!-- Mobile Card List View -->
         <div class="md:hidden divide-y divide-slate-800/60 p-3 space-y-3">
           <div 
-            v-for="tx in transactions" 
+            v-for="tx in txStore.transactions" 
             :key="tx.id" 
             class="p-4 rounded-2xl bg-slate-950/60 border border-slate-800/80 space-y-3 hover:border-slate-700 transition"
           >
@@ -252,17 +252,17 @@
         </div>
 
         <!-- Pagination Footer Controls -->
-        <div v-if="!pending && transactions.length > 0" class="p-4 sm:p-5 bg-slate-950/40 border-t border-slate-800/80 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div v-if="!txStore.loading && txStore.transactions.length > 0" class="p-4 sm:p-5 bg-slate-950/40 border-t border-slate-800/80 flex flex-col md:flex-row items-center justify-between gap-4">
           <!-- Showing Info & Per Page selector -->
           <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3 text-xs text-slate-400">
             <span>
-              Menampilkan <strong class="text-white font-mono font-semibold">{{ pagination.from }}</strong> - <strong class="text-white font-mono font-semibold">{{ pagination.to }}</strong> dari <strong class="text-white font-mono font-semibold">{{ pagination.total }}</strong> transaksi
+              Menampilkan <strong class="text-white font-mono font-semibold">{{ txStore.pagination.from }}</strong> - <strong class="text-white font-mono font-semibold">{{ txStore.pagination.to }}</strong> dari <strong class="text-white font-mono font-semibold">{{ txStore.pagination.total }}</strong> transaksi
             </span>
             <div class="flex items-center gap-2 pl-0 sm:pl-3 border-l-0 sm:border-l border-slate-800">
               <span class="text-slate-500">Per halaman:</span>
               <select 
-                v-model.number="pagination.perPage"
-                @change="changePerPage(pagination.perPage)"
+                v-model.number="txStore.pagination.perPage"
+                @change="txStore.changePerPage(txStore.pagination.perPage)"
                 class="px-2.5 py-1 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition font-mono cursor-pointer"
               >
                 <option :value="5">5</option>
@@ -278,8 +278,8 @@
           <div class="flex items-center gap-1.5 self-center md:self-auto">
             <!-- First Page Button -->
             <button 
-              @click="changePage(1)"
-              :disabled="pagination.currentPage <= 1"
+              @click="txStore.changePage(1)"
+              :disabled="txStore.pagination.currentPage <= 1"
               class="p-2 rounded-xl border border-slate-800/80 bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition active:scale-95"
               title="Halaman Pertama"
             >
@@ -288,8 +288,8 @@
 
             <!-- Prev Page Button -->
             <button 
-              @click="changePage(pagination.currentPage - 1)"
-              :disabled="pagination.currentPage <= 1"
+              @click="txStore.changePage(txStore.pagination.currentPage - 1)"
+              :disabled="txStore.pagination.currentPage <= 1"
               class="p-2 rounded-xl border border-slate-800/80 bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition active:scale-95 flex items-center gap-1 text-xs"
               title="Halaman Sebelumnya"
             >
@@ -299,14 +299,14 @@
 
             <!-- Numbered Page Buttons -->
             <div class="flex items-center gap-1 px-1">
-              <template v-for="(p, idx) in displayedPages" :key="idx">
+              <template v-for="(p, idx) in txStore.displayedPages" :key="idx">
                 <span v-if="p === '...'" class="px-2 py-1 text-slate-600 text-xs font-mono">...</span>
                 <button 
                   v-else
-                  @click="changePage(p)"
+                  @click="txStore.changePage(Number(p))"
                   :class="[
                     'w-8 h-8 rounded-xl font-bold text-xs transition active:scale-95 flex items-center justify-center font-mono',
-                    p === pagination.currentPage
+                    p === txStore.pagination.currentPage
                       ? 'bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-md shadow-indigo-600/30 font-extrabold'
                       : 'border border-slate-800/80 bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-white'
                   ]"
@@ -318,8 +318,8 @@
 
             <!-- Next Page Button -->
             <button 
-              @click="changePage(pagination.currentPage + 1)"
-              :disabled="pagination.currentPage >= pagination.lastPage"
+              @click="txStore.changePage(txStore.pagination.currentPage + 1)"
+              :disabled="txStore.pagination.currentPage >= txStore.pagination.lastPage"
               class="p-2 rounded-xl border border-slate-800/80 bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition active:scale-95 flex items-center gap-1 text-xs"
               title="Halaman Berikutnya"
             >
@@ -329,8 +329,8 @@
 
             <!-- Last Page Button -->
             <button 
-              @click="changePage(pagination.lastPage)"
-              :disabled="pagination.currentPage >= pagination.lastPage"
+              @click="txStore.changePage(txStore.pagination.lastPage)"
+              :disabled="txStore.pagination.currentPage >= txStore.pagination.lastPage"
               class="p-2 rounded-xl border border-slate-800/80 bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition active:scale-95"
               title="Halaman Terakhir"
             >
@@ -465,7 +465,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { 
   ArrowLeftRight, 
   Plus, 
@@ -485,31 +485,7 @@ import {
 const { fetchApi } = useApi()
 const toast = useToast()
 const coaStore = useCoaStore()
-
-const transactions = ref([])
-const pending = ref(true)
-
-const pagination = ref({
-  currentPage: 1,
-  lastPage: 1,
-  perPage: 10,
-  total: 0,
-  from: 0,
-  to: 0
-})
-
-const summary = ref({
-  totalDebit: 0,
-  totalCredit: 0,
-  net: 0
-})
-
-const filters = ref({
-  search: '',
-  coa_id: '',
-  start_date: '',
-  end_date: ''
-})
+const txStore = useTransactionStore()
 
 const showModal = ref(false)
 const isEditing = ref(false)
@@ -523,8 +499,7 @@ let debounceTimer = null
 const debounceLoad = () => {
   clearTimeout(debounceTimer)
   debounceTimer = setTimeout(() => {
-    pagination.value.currentPage = 1
-    loadTransactions(1)
+    txStore.fetchTransactions(1)
   }, 300)
 }
 
@@ -536,109 +511,6 @@ const form = ref({
   debit: 0,
   credit: 0
 })
-
-const totalFilteredDebit = computed(() => {
-  return summary.value.totalDebit
-})
-
-const totalFilteredCredit = computed(() => {
-  return summary.value.totalCredit
-})
-
-const netFiltered = computed(() => {
-  return summary.value.net
-})
-
-const displayedPages = computed(() => {
-  const current = pagination.value.currentPage
-  const last = pagination.value.lastPage
-  const delta = 2
-  const range = []
-  const rangeWithDots = []
-  let l
-
-  for (let i = 1; i <= last; i++) {
-    if (i === 1 || i === last || (i >= current - delta && i <= current + delta)) {
-      range.push(i)
-    }
-  }
-
-  for (const i of range) {
-    if (l) {
-      if (i - l === 2) {
-        rangeWithDots.push(l + 1)
-      } else if (i - l !== 1) {
-        rangeWithDots.push('...')
-      }
-    }
-    rangeWithDots.push(i)
-    l = i
-  }
-
-  return rangeWithDots
-})
-
-const loadTransactions = async (page = null) => {
-  pending.value = true
-  if (page !== null) {
-    pagination.value.currentPage = page
-  }
-
-  const query = new URLSearchParams()
-  query.append('page', String(pagination.value.currentPage))
-  query.append('per_page', String(pagination.value.perPage))
-
-  if (filters.value.search) query.append('search', filters.value.search)
-  if (filters.value.coa_id) query.append('coa_id', filters.value.coa_id)
-  if (filters.value.start_date) query.append('start_date', filters.value.start_date)
-  if (filters.value.end_date) query.append('end_date', filters.value.end_date)
-
-  const res = await fetchApi(`/transactions?${query.toString()}`)
-  if (res.data) {
-    if (res.data.data !== undefined) {
-      transactions.value = res.data.data
-      pagination.value.currentPage = res.data.current_page || 1
-      pagination.value.lastPage = res.data.last_page || 1
-      pagination.value.total = res.data.total || 0
-      pagination.value.from = res.data.from || (transactions.value.length > 0 ? 1 : 0)
-      pagination.value.to = res.data.to || transactions.value.length
-      if (res.data.summary) {
-        summary.value.totalDebit = Number(res.data.summary.total_debit || 0)
-        summary.value.totalCredit = Number(res.data.summary.total_credit || 0)
-        summary.value.net = Number(res.data.summary.net || 0)
-      }
-    } else if (Array.isArray(res.data)) {
-      transactions.value = res.data
-      pagination.value.total = res.data.length
-      pagination.value.from = res.data.length > 0 ? 1 : 0
-      pagination.value.to = res.data.length
-      pagination.value.currentPage = 1
-      pagination.value.lastPage = 1
-      summary.value.totalDebit = transactions.value.reduce((sum, tx) => sum + Number(tx.debit || 0), 0)
-      summary.value.totalCredit = transactions.value.reduce((sum, tx) => sum + Number(tx.credit || 0), 0)
-      summary.value.net = summary.value.totalCredit - summary.value.totalDebit
-    }
-  }
-  if (res.error) toast.error(res.error, 'Gagal memuat transaksi')
-  pending.value = false
-}
-
-const changePage = (page) => {
-  if (page < 1 || page > pagination.value.lastPage || page === pagination.value.currentPage) return
-  loadTransactions(page)
-}
-
-const changePerPage = (perPage) => {
-  pagination.value.perPage = perPage
-  pagination.value.currentPage = 1
-  loadTransactions(1)
-}
-
-const resetFilters = () => {
-  filters.value = { search: '', coa_id: '', start_date: '', end_date: '' }
-  pagination.value.currentPage = 1
-  loadTransactions(1)
-}
 
 const onCoaChange = () => {
   const selected = coaStore.coas.find(c => c.id === form.value.coa_id)
@@ -696,7 +568,7 @@ const saveTransaction = async () => {
     if (res.data) {
       toast.success('Transaksi keuangan berhasil diperbarui')
       showModal.value = false
-      await loadTransactions()
+      await txStore.refresh()
     } else {
       toast.error(res.error || 'Gagal memperbarui transaksi')
     }
@@ -708,7 +580,7 @@ const saveTransaction = async () => {
     if (res.data) {
       toast.success('Transaksi keuangan berhasil ditambahkan')
       showModal.value = false
-      await loadTransactions(1)
+      await txStore.refreshFirstPage()
     } else {
       toast.error(res.error || 'Gagal menambahkan transaksi')
     }
@@ -728,7 +600,7 @@ const executeDelete = async () => {
   if (!res.error) {
     toast.success('Catatan transaksi telah dihapus')
     showDeleteModal.value = false
-    await loadTransactions()
+    await txStore.refresh()
   } else {
     toast.error(res.error || 'Gagal menghapus transaksi')
   }
@@ -737,6 +609,6 @@ const executeDelete = async () => {
 
 onMounted(async () => {
   await coaStore.fetchAll()
-  await loadTransactions()
+  await txStore.fetchTransactions()
 })
 </script>
