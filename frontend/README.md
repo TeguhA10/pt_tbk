@@ -4,6 +4,7 @@ Aplikasi antarmuka web modern untuk Sistem Manajemen Keuangan dan Laporan Laba R
 
 ## 🛠️ Stack Teknologi & Arsitektur
 
+- **Runtime**: Node.js 22.x
 - **Framework**: Nuxt 4.x / Vue 3.5
 - **State Management**: Pinia (`@pinia/nuxt`)
   - `useCoaStore`: Caching data master COA & Kategori untuk efisiensi API call

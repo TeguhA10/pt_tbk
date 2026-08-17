@@ -1,13 +1,14 @@
 # PT. Trans Berjaya Khatulistiwa - Financial Management System
 
 [![Laravel](https://img.shields.io/badge/Laravel-13.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)](https://laravel.com)
-[![PHP](https://img.shields.io/badge/PHP-8.3-777BB4?style=for-the-badge&logo=php&logoColor=white)](https://php.net)
+[![PHP](https://img.shields.io/badge/PHP-8.4-777BB4?style=for-the-badge&logo=php&logoColor=white)](https://php.net)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org)
 [![Nuxt](https://img.shields.io/badge/Nuxt-4.x-00DC82?style=for-the-badge&logo=nuxtdotjs&logoColor=white)](https://nuxt.com)
+[![Node.js](https://img.shields.io/badge/Node.js-22.x-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org)
 [![Vue.js](https://img.shields.io/badge/Vue.js-3.5-4FC08D?style=for-the-badge&logo=vuedotjs&logoColor=white)](https://vuejs.org)
 [![Pinia](https://img.shields.io/badge/Pinia-2.x-ffd859?style=for-the-badge&logo=vuedotjs&logoColor=black)](https://pinia.vuejs.org)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
-[![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com)
 
 Sistem Informasi Manajemen Keuangan dan Pelaporan Laba Rugi (*Profit and Loss Statement*) terpadu untuk **PT. Trans Berjaya Khatulistiwa**. Dibangun dengan arsitektur modern berbasis RESTful API (Laravel + PostgreSQL) dan antarmuka web SPA/SSR yang responsif, elegan, dan interaktif (Nuxt + Pinia + Tailwind CSS).
 
@@ -16,10 +17,17 @@ Sistem Informasi Manajemen Keuangan dan Pelaporan Laba Rugi (*Profit and Loss St
 ## 🌟 Fitur Utama
 
 - **📊 Executive Financial Dashboard**:
-  - Kartu ringkasan KPI (*Total Income*, *Total Expense*, *Net Income*, & *Margin Laba Bersih*).
-  - Grafik batang tren bulanan adaptif dan interaktif (*Monthly Cash Flow Comparison*).
-  - Distribusi alokasi biaya per kategori master.
-  - Widget transaksi terkini dengan pratinjau instan.
+  - **KPI Cards**: *Total Income*, *Total Expense*, *Net Income (Laba Bersih)*, & *Profit Margin %*.
+  - **Tren Performa Keuangan Bulanan (Enterprise Dual-Bar Chart)**:
+    - Sumbu Y dengan skala nominal otomatis dan garis panduan kisi (*Dashed Gridlines*).
+    - Visualisasi pilar batang ganda (*Income* hijau zamrud & *Expense* merah muda/karang) dengan efek *ambient glow*.
+    - *Floating Hover Tooltip*: Menampilkan nilai nominal presisi saat kursor diarahkan ke batang grafik.
+    - *Toggle View Mode*: Beralih secara instan antara **Mode Grafik** dan **Tabel Ringkasan Komparasi Eksekutif**.
+    - *Insight Chips*: Rata-rata pendapatan, pengeluaran, dan laba bulanan.
+  - **Distribusi Kategori Akun**:
+    - Progress bar bergradasi halus dengan persentase proporsional terhadap total kelompok (*income/expense*).
+  - **Widget Transaksi Terbaru**:
+    - Tabel mutasi real-time 5 transaksi terakhir lengkap dengan badge akun COA dan nominal.
 - **📁 Master Kategori Akun**:
   - Manajemen pengelompokan akun pemasukan (*Income*) dan pengeluaran operasional (*Expense*).
   - Visual filter tab (*All*, *Income*, *Expense*) & indikator jumlah sub-COA terdaftar.
@@ -36,7 +44,7 @@ Sistem Informasi Manajemen Keuangan dan Pelaporan Laba Rugi (*Profit and Loss St
   - *Sticky Category Column*: Kolom nama kategori tetap terkunci di sisi kiri saat digeser horizontal pada layar HP / tablet.
   - Fitur **Export Excel (.xlsx / .csv)** dan **Cetak PDF**.
 - **⚡ State Management & Caching (Pinia)**:
-  - **`useCoaStore`**: Sentralisasi data COA & Kategori dengan mekanisme *smart-caching*, mencegah redudansi *API request* antar navigasi halaman.
+  - **`useCoaStore`**: Sentralisasi data COA & Kategori dengan mekanisme *smart-caching*, mencegah redundansi *API request* antar navigasi halaman.
   - **`useTransactionStore`**: Sentralisasi transaksi keuangan, kontrol pagination, filter reaktif, dan ringkasan kalkulasi metrik.
   - **`useThemeStore`**: Pengelolaan state tema reaktif dengan *localStorage persistence*.
 - **🌓 Mode Gelap & Mode Terang (Dark / Light Mode)**:
@@ -57,8 +65,8 @@ PT. Trans Berjaya Khatulistiwa/
 │   ├── app/                  # Controllers, Models, Requests
 │   ├── database/             # Migrations & Seeders (FY 2022 sample data)
 │   ├── routes/api.php        # API Endpoints
-│   ├── Dockerfile            # PHP 8.3 & Composer Docker image
-│   └── docker-entrypoint.sh  # Auto DB wait, migration & seeder runner
+│   ├── Dockerfile            # PHP 8.4-cli-alpine & Composer
+│   └── docker-entrypoint.sh  # Auto DB wait, migration & idempotent seeder
 ├── frontend/                 # Nuxt 4 Frontend Web Application
 │   ├── app/
 │   │   ├── assets/css/       # Custom scrollbars, glass tokens, Dark/Light CSS
@@ -67,7 +75,7 @@ PT. Trans Berjaya Khatulistiwa/
 │   │   ├── layouts/          # Responsive Sidebar & Topbar Header (Theme Toggle)
 │   │   ├── pages/            # Dashboard, Categories, COAs, Transactions, Reports
 │   │   └── stores/           # Pinia Stores (coa.ts, transaction.ts, theme.ts)
-│   ├── Dockerfile            # Node.js 20 & Nuxt runner
+│   ├── Dockerfile            # Node.js 22-alpine & Nuxt runner
 │   └── nuxt.config.ts        # Nuxt Configuration
 ├── docker-compose.yml        # Orchestration (PostgreSQL + Backend + Frontend)
 └── README.md                 # Dokumentasi Proyek
@@ -77,7 +85,7 @@ PT. Trans Berjaya Khatulistiwa/
 
 ## 🚀 Menjalankan Aplikasi dengan Docker (Rekomendasi)
 
-Hanya memerlukan **1 perintah** untuk menjalankan seluruh stack (Database, Backend API, dan Frontend):
+Hanya memerlukan **1 perintah** untuk membangun image dan menjalankan seluruh stack (Database, Backend API, dan Frontend):
 
 ### 1. Prasyarat
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) telah terpasang dan berjalan di komputer Anda.
@@ -86,10 +94,8 @@ Hanya memerlukan **1 perintah** untuk menjalankan seluruh stack (Database, Backe
 Buka terminal pada direktori root proyek dan jalankan:
 
 ```bash
-docker compose up --build
+docker compose up -d --build
 ```
-
-*(Atau jalankan di background dengan `docker compose up --build -d`)*
 
 ### 3. Akses Aplikasi
 - **Frontend Web App**: [http://localhost:3000](http://localhost:3000)
@@ -97,58 +103,46 @@ docker compose up --build
 - **Database PostgreSQL**: `localhost:5432` (`db_tbk`, user: `postgres`, pass: `password123!`)
 
 > [!TIP]
-> **Otomatisasi Database & Tabel pada Docker**:
+> **Otomatisasi Database & Data Awal**:
 > Ketika Anda menjalankan `docker compose up`, container PostgreSQL akan **otomatis membuat database `db_tbk`**, lalu script `docker-entrypoint.sh` akan **otomatis menjalankan migrasi tabel** dan mengisi seluruh **data awal (*seeders*)** tanpa perlu setup manual.
 
-### 4. Menghentikan Container
-```bash
-docker compose down
-```
-*(Tambahkan `-v` jika ingin menghapus volume data database: `docker compose down -v`)*
+---
+
+## 🛠️ Panduan Perintah Docker
+
+| Perintah | Deskripsi |
+| :--- | :--- |
+| `docker compose up -d` | Menjalankan seluruh container di latar belakang (*background*) |
+| `docker compose up -d --build` | Mem-build ulang image dan menjalankan container |
+| `docker compose build --no-cache` | Mem-build ulang dari awal tanpa cache lama |
+| `docker compose ps` | Memeriksa status dan port container yang berjalan |
+| `docker compose logs -f` | Menampilkan log real-time dari semua service |
+| `docker compose logs -f backend` | Menampilkan log spesifik service backend |
+| `docker compose logs -f frontend` | Menampilkan log spesifik service frontend |
+| `docker compose restart backend` | Me-restart service backend |
+| `docker compose down` | Menghentikan semua container |
+| `docker compose down -v` | Menghentikan container sekaligus mereset/menghapus volume database |
 
 ---
 
 ## 🗄️ Inisialisasi Database & Tabel
 
 ### A. Melalui Docker (100% Otomatis)
-- Tidak perlu membuat database atau menjalankan migrasi manual. Script docker secara otomatis menangani:
-  1. Menunggu database PostgreSQL online.
-  2. Menjalankan `php artisan migrate --force`.
-  3. Menjalankan `php artisan db:seed --force`.
+Script docker secara otomatis menangani:
+1. Menunggu koneksi database PostgreSQL siap (*healthcheck*).
+2. Menjalankan `php artisan migrate --force`.
+3. Menjalankan `php artisan db:seed --force` (idempotent, tidak akan menduplikasi data).
 
-### B. Melalui Manual Local
-- Buat database `db_tbk` di PostgreSQL lokal:
-  ```sql
-  CREATE DATABASE db_tbk;
-  ```
-- Jalankan migrasi dan seeder tabel:
-  ```bash
-  php artisan migrate --seed
-  ```
-
-
----
-
-## 🛠️ Menjalankan Secara Manual (Tanpa Docker)
-
-Jika ingin menjalankan service secara terpisah di lingkungan lokal:
-
-### A. Backend (Laravel & PostgreSQL)
-
-1. Masuk ke direktori backend:
-   ```bash
-   cd backend
+### B. Melalui Manual Local (Tanpa Docker)
+1. Buat database `db_tbk` di PostgreSQL:
+   ```sql
+   CREATE DATABASE db_tbk;
    ```
-2. Pastikan dependensi PHP terinstall:
+2. Salin environment dan atur koneksi:
    ```bash
-   composer install
+   cp backend/.env.example backend/.env
    ```
-3. Salin file `.env` dan atur konfigurasi database PostgreSQL:
-   ```bash
-   cp .env.example .env
-   php artisan key:generate
-   ```
-4. Sesuaikan konfigurasi database pada `.env`:
+   Pastikan di `backend/.env`:
    ```env
    DB_CONNECTION=pgsql
    DB_HOST=127.0.0.1
@@ -157,34 +151,35 @@ Jika ingin menjalankan service secara terpisah di lingkungan lokal:
    DB_USERNAME=postgres
    DB_PASSWORD=password123!
    ```
-5. Jalankan migrasi dan seeding data:
+3. Jalankan migrasi dan seeder:
    ```bash
+   cd backend
    php artisan migrate --seed
    ```
-6. Jalankan server backend:
-   ```bash
-   php artisan serve --port=8000
-   ```
 
-### B. Frontend (Nuxt & Vue 3)
+---
 
-1. Buka terminal baru dan masuk ke direktori frontend:
-   ```bash
-   cd frontend
-   ```
-2. Install dependensi Node.js:
-   ```bash
-   npm install
-   # atau
-   yarn install
-   ```
-3. Jalankan development server:
-   ```bash
-   npm run dev
-   # atau
-   yarn dev
-   ```
-4. Buka browser di [http://localhost:3000](http://localhost:3000).
+## 💻 Menjalankan Secara Manual (Tanpa Docker)
+
+Jika ingin menjalankan service secara terpisah di mesin lokal:
+
+### A. Backend (Laravel 13 & PHP 8.4)
+```bash
+cd backend
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --seed
+php artisan serve --port=8000
+```
+
+### B. Frontend (Nuxt 4 & Node.js 22)
+```bash
+cd frontend
+npm install
+npm run dev
+```
+Buka browser di [http://localhost:3000](http://localhost:3000).
 
 ---
 
@@ -216,7 +211,7 @@ Data awal (*seeders*) telah disesuaikan secara presisi dengan dokumen acuan peng
 - **Income Categories**: Salary, Other Income
 - **Expense Categories**: Family Expense, Transport Expense, Meal Expense
 - **Accounts (COA)**: Gaji Karyawan (401), Gaji Ketua MPR (402), Profit Trading (403), Biaya Sekolah (601), Bensin (602), Parkir (603), Makan Siang (604), Makanan Pokok (605)
-- **18 Mutasi Transaksi Keuangan** dengan kalkulasi saldo surplus bersih Q1.
+- **19 Mutasi Transaksi Keuangan** dengan kalkulasi saldo surplus bersih Q1.
 
 ---
 

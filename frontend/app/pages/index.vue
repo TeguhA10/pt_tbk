@@ -151,100 +151,261 @@
 
       <!-- Monthly Trend Chart & Category Breakdown Grid -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-        <!-- Monthly Trend Bar Chart -->
-        <div class="lg:col-span-2 p-5 sm:p-7 rounded-3xl bg-slate-900/80 border border-slate-800 shadow-xl space-y-6">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
-            <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
-                <BarChart3 class="w-4 h-4" />
+        <!-- Monthly Trend Professional Chart -->
+        <div class="lg:col-span-2 p-5 sm:p-7 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-2xl flex flex-col justify-between space-y-6 relative overflow-hidden backdrop-blur-sm">
+          <!-- Ambient Glow Background -->
+          <div class="absolute -right-16 -top-16 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+          <!-- Chart Card Header -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-5">
+            <div class="flex items-center gap-3.5">
+              <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-indigo-700/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shadow-inner">
+                <BarChart3 class="w-5 h-5" />
               </div>
               <div>
-                <h2 class="text-sm sm:text-base font-bold text-white">Tren Performa Keuangan Bulanan</h2>
-                <p class="text-xs text-slate-400">Komparasi pemasukan vs pengeluaran per periode</p>
+                <div class="flex items-center gap-2">
+                  <h2 class="text-base sm:text-lg font-bold text-white tracking-tight">Tren Performa Keuangan Bulanan</h2>
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
+                    Q1 2022
+                  </span>
+                </div>
+                <p class="text-xs text-slate-400 mt-0.5">Analisis arus kas masuk vs keluar dan laba operasional</p>
               </div>
             </div>
             
-            <div class="flex items-center gap-4 text-xs font-semibold">
-              <span class="flex items-center gap-1.5 text-emerald-400">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Income
-              </span>
-              <span class="flex items-center gap-1.5 text-rose-400">
-                <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Expense
-              </span>
+            <!-- View Mode Switcher & Legend -->
+            <div class="flex flex-wrap items-center gap-3">
+              <div class="flex items-center gap-1.5 p-1 bg-slate-950/80 rounded-xl border border-slate-800 text-xs">
+                <button 
+                  @click="chartViewMode = 'chart'"
+                  :class="['px-3 py-1 rounded-lg font-semibold transition flex items-center gap-1.5', chartViewMode === 'chart' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200']"
+                >
+                  <BarChart3 class="w-3.5 h-3.5" />
+                  <span>Grafik</span>
+                </button>
+                <button 
+                  @click="chartViewMode = 'table'"
+                  :class="['px-3 py-1 rounded-lg font-semibold transition flex items-center gap-1.5', chartViewMode === 'table' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200']"
+                >
+                  <Table class="w-3.5 h-3.5" />
+                  <span>Tabel</span>
+                </button>
+              </div>
+
+              <div class="hidden sm:flex items-center gap-3 text-xs font-semibold px-3 py-1.5 rounded-xl bg-slate-950/50 border border-slate-800/80">
+                <span class="flex items-center gap-1.5 text-emerald-400">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></span> Income
+                </span>
+                <span class="flex items-center gap-1.5 text-rose-400">
+                  <span class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-sm shadow-rose-500/50"></span> Expense
+                </span>
+              </div>
             </div>
           </div>
 
-          <!-- Dynamic Bar Chart Visualization -->
-          <div class="grid grid-cols-3 gap-3 sm:gap-6 min-h-[220px] items-end pt-4 px-2">
-            <div 
-              v-for="item in stats?.monthly_chart" 
-              :key="item.month" 
-              class="flex flex-col items-center gap-3 h-full justify-end group relative"
-            >
-              <!-- Bar Columns -->
-              <div class="w-full max-w-[130px] flex items-end justify-center gap-2 sm:gap-3 h-48 bg-slate-950/70 rounded-2xl p-2.5 sm:p-3 border border-slate-800/80 shadow-inner group-hover:border-slate-700 transition">
-                <!-- Income bar -->
-                <div 
-                  class="w-6 sm:w-10 bg-gradient-to-t from-emerald-600 to-emerald-400 rounded-t-lg transition-all duration-500 group-hover:brightness-125 shadow-md shadow-emerald-500/20 cursor-pointer"
-                  :style="{ height: `${Math.max(8, Math.round((item.income / maxChartValue) * 100))}%` }"
-                  :title="`Income ${item.month}: ${formatRupiah(item.income)}`"
-                ></div>
-                <!-- Expense bar -->
-                <div 
-                  class="w-6 sm:w-10 bg-gradient-to-t from-rose-600 to-rose-400 rounded-t-lg transition-all duration-500 group-hover:brightness-125 shadow-md shadow-rose-500/20 cursor-pointer"
-                  :style="{ height: `${Math.max(8, Math.round((item.expense / maxChartValue) * 100))}%` }"
-                  :title="`Expense ${item.month}: ${formatRupiah(item.expense)}`"
-                ></div>
+          <!-- Mode 1: High-Tech Dual Bar Chart -->
+          <div v-if="chartViewMode === 'chart'" class="space-y-6">
+            <!-- Chart Stage with Y-Axis Gridlines -->
+            <div class="relative min-h-[260px] pt-6 pb-2 px-1 flex">
+              <!-- Y-Axis Scale Labels -->
+              <div class="flex flex-col justify-between text-[10px] font-mono text-slate-500 pr-3 select-none text-right w-14 shrink-0 pb-12">
+                <span>{{ formatCompactRupiah(chartYMax) }}</span>
+                <span>{{ formatCompactRupiah(chartYMax * 0.75) }}</span>
+                <span>{{ formatCompactRupiah(chartYMax * 0.5) }}</span>
+                <span>{{ formatCompactRupiah(chartYMax * 0.25) }}</span>
+                <span>Rp 0</span>
               </div>
 
-              <!-- Month Details -->
-              <div class="text-center space-y-0.5">
-                <p class="text-xs font-bold text-slate-200">{{ item.month }}</p>
-                <p :class="['text-[11px] font-mono font-semibold', item.net >= 0 ? 'text-emerald-400' : 'text-rose-400']">
-                  {{ formatRupiah(item.net) }}
+              <!-- Gridlines & Columns Container -->
+              <div class="relative flex-1 flex flex-col justify-between">
+                <!-- Dashed Horizontal Grid Lines -->
+                <div class="absolute inset-x-0 top-0 h-full flex flex-col justify-between pointer-events-none pb-12">
+                  <div class="w-full border-b border-slate-800/60 border-dashed"></div>
+                  <div class="w-full border-b border-slate-800/40 border-dashed"></div>
+                  <div class="w-full border-b border-slate-800/40 border-dashed"></div>
+                  <div class="w-full border-b border-slate-800/40 border-dashed"></div>
+                  <div class="w-full border-b border-slate-700/80"></div>
+                </div>
+
+                <!-- Monthly Bar Groups -->
+                <div class="relative z-10 flex items-end justify-around h-full gap-2 sm:gap-6 pb-2">
+                  <div 
+                    v-for="(item, idx) in stats?.monthly_chart" 
+                    :key="item.month" 
+                    class="flex flex-1 flex-col items-center justify-end h-full group relative max-w-[170px]"
+                  >
+                    <!-- Pillars Box -->
+                    <div class="w-full h-48 flex items-end justify-center gap-2 sm:gap-3.5 px-2">
+                      <!-- Income Bar -->
+                      <div class="relative flex flex-col items-center h-full justify-end group/bar">
+                        <!-- Value floating badge on hover -->
+                        <div class="absolute -top-7 opacity-0 group-hover/bar:opacity-100 transition-all duration-200 pointer-events-none z-30 px-2 py-0.5 rounded-lg bg-emerald-950 text-emerald-300 border border-emerald-500/40 text-[10px] font-mono font-bold whitespace-nowrap shadow-xl">
+                          +{{ formatRupiah(item.income) }}
+                        </div>
+                        <div 
+                          class="w-6 sm:w-11 bg-gradient-to-t from-emerald-600 via-emerald-500 to-teal-400 rounded-t-xl transition-all duration-500 group-hover/bar:brightness-125 shadow-lg shadow-emerald-500/20 cursor-pointer relative overflow-hidden"
+                          :style="{ height: `${Math.max(6, Math.min(100, Math.round((Number(item.income || 0) / chartYMax) * 100)))}%` }"
+                        >
+                          <div class="absolute inset-x-0 top-0 h-1.5 bg-emerald-200/40 rounded-t-xl"></div>
+                        </div>
+                      </div>
+
+                      <!-- Expense Bar -->
+                      <div class="relative flex flex-col items-center h-full justify-end group/bar">
+                        <!-- Value floating badge on hover -->
+                        <div class="absolute -top-7 opacity-0 group-hover/bar:opacity-100 transition-all duration-200 pointer-events-none z-30 px-2 py-0.5 rounded-lg bg-rose-950 text-rose-300 border border-rose-500/40 text-[10px] font-mono font-bold whitespace-nowrap shadow-xl">
+                          -{{ formatRupiah(item.expense) }}
+                        </div>
+                        <div 
+                          class="w-6 sm:w-11 bg-gradient-to-t from-rose-600 via-rose-500 to-pink-400 rounded-t-xl transition-all duration-500 group-hover/bar:brightness-125 shadow-lg shadow-rose-500/20 cursor-pointer relative overflow-hidden"
+                          :style="{ height: `${Math.max(6, Math.min(100, Math.round((Number(item.expense || 0) / chartYMax) * 100)))}%` }"
+                        >
+                          <div class="absolute inset-x-0 top-0 h-1.5 bg-rose-200/40 rounded-t-xl"></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Month Label & Net Status -->
+                    <div class="mt-3 text-center space-y-1 w-full">
+                      <p class="text-xs font-extrabold text-slate-200 tracking-wide">
+                        {{ formatMonthName(item.month) }}
+                      </p>
+                      <div 
+                        :class="[
+                          'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold border transition',
+                          item.net >= 0 
+                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 group-hover:bg-emerald-500/20' 
+                            : 'bg-rose-500/10 text-rose-400 border-rose-500/30 group-hover:bg-rose-500/20'
+                        ]"
+                        :title="`Net Cashflow: ${formatRupiah(item.net)}`"
+                      >
+                        <TrendingUp v-if="item.net >= 0" class="w-3 h-3 text-emerald-400" />
+                        <TrendingDown v-else class="w-3 h-3 text-rose-400" />
+                        <span>{{ formatCompactRupiah(item.net) }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer Summary Chips -->
+            <div class="grid grid-cols-3 gap-2 sm:gap-4 pt-3 border-t border-slate-800/80 text-center">
+              <div class="p-3 rounded-2xl bg-slate-950/60 border border-slate-800/80">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rata-rata Pendapatan</p>
+                <p class="text-xs sm:text-sm font-mono font-extrabold text-emerald-400 mt-0.5">
+                  {{ formatRupiah(monthlyStatsAverage.income) }}
+                </p>
+              </div>
+              <div class="p-3 rounded-2xl bg-slate-950/60 border border-slate-800/80">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rata-rata Pengeluaran</p>
+                <p class="text-xs sm:text-sm font-mono font-extrabold text-rose-400 mt-0.5">
+                  {{ formatRupiah(monthlyStatsAverage.expense) }}
+                </p>
+              </div>
+              <div class="p-3 rounded-2xl bg-slate-950/60 border border-slate-800/80">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rata-rata Laba Bersih</p>
+                <p class="text-xs sm:text-sm font-mono font-extrabold text-indigo-300 mt-0.5">
+                  {{ formatRupiah(monthlyStatsAverage.net) }}
                 </p>
               </div>
             </div>
           </div>
+
+          <!-- Mode 2: Detailed Performance Table -->
+          <div v-else class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead>
+                <tr class="text-slate-400 border-b border-slate-800 uppercase font-semibold bg-slate-950/60">
+                  <th class="py-3 px-4 rounded-l-xl">Periode</th>
+                  <th class="py-3 px-4 text-right">Income (Pendapatan)</th>
+                  <th class="py-3 px-4 text-right">Expense (Beban)</th>
+                  <th class="py-3 px-4 text-right">Net Income (Laba)</th>
+                  <th class="py-3 px-4 text-right rounded-r-xl">Profit Margin</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800/60 font-medium">
+                <tr v-for="item in stats?.monthly_chart" :key="item.month" class="hover:bg-slate-800/30 transition">
+                  <td class="py-3.5 px-4 font-bold text-white font-mono">{{ formatMonthName(item.month) }}</td>
+                  <td class="py-3.5 px-4 text-right font-mono text-emerald-400 font-semibold">{{ formatRupiah(item.income) }}</td>
+                  <td class="py-3.5 px-4 text-right font-mono text-rose-400 font-semibold">{{ formatRupiah(item.expense) }}</td>
+                  <td class="py-3.5 px-4 text-right font-mono font-bold" :class="item.net >= 0 ? 'text-emerald-400' : 'text-rose-400'">
+                    {{ item.net >= 0 ? '+' : '' }}{{ formatRupiah(item.net) }}
+                  </td>
+                  <td class="py-3.5 px-4 text-right font-mono text-indigo-300 font-bold">
+                    {{ item.income > 0 ? Math.round((item.net / item.income) * 100) : 0 }}%
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
-        <!-- Category Breakdown -->
-        <div class="p-5 sm:p-7 rounded-3xl bg-slate-900/80 border border-slate-800 shadow-xl space-y-6">
-          <div class="flex items-center gap-3 border-b border-slate-800 pb-4">
-            <div class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-              <PieChart class="w-4 h-4" />
+        <!-- Category Breakdown Enhanced Card -->
+        <div class="p-5 sm:p-7 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-2xl flex flex-col justify-between space-y-6 relative overflow-hidden backdrop-blur-sm">
+          <!-- Ambient Glow -->
+          <div class="absolute -right-16 -bottom-16 w-60 h-60 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+          <div>
+            <div class="flex items-center justify-between border-b border-slate-800/80 pb-5">
+              <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-700/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-inner">
+                  <PieChart class="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 class="text-base sm:text-lg font-bold text-white tracking-tight">Distribusi Kategori</h2>
+                  <p class="text-xs text-slate-400">Total nominal berdasarkan kategori master</p>
+                </div>
+              </div>
+              <span class="text-xs font-mono font-bold text-slate-400">
+                {{ stats?.category_breakdown?.length || 0 }} Kategori
+              </span>
             </div>
-            <div>
-              <h2 class="text-sm sm:text-base font-bold text-white">Distribusi Kategori</h2>
-              <p class="text-xs text-slate-400">Total nominal berdasarkan kategori master</p>
+
+            <!-- List Categories -->
+            <div class="space-y-4 mt-5">
+              <div 
+                v-for="cat in stats?.category_breakdown" 
+                :key="cat.name + cat.type" 
+                class="space-y-1.5 p-2.5 rounded-2xl bg-slate-950/40 hover:bg-slate-800/50 border border-slate-800/60 transition group"
+              >
+                <div class="flex items-center justify-between text-xs">
+                  <span class="font-medium text-slate-200 flex items-center gap-2 truncate">
+                    <span :class="['w-2.5 h-2.5 rounded-full shrink-0 shadow-sm', cat.type === 'income' ? 'bg-emerald-400 shadow-emerald-400/50' : 'bg-rose-400 shadow-rose-400/50']"></span>
+                    <span class="truncate font-semibold text-slate-100">{{ cat.name }}</span>
+                    <span class="text-[9px] px-1.5 py-0.2 rounded font-bold uppercase tracking-wider" :class="cat.type === 'income' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-rose-500/15 text-rose-400'">
+                      {{ cat.type }}
+                    </span>
+                  </span>
+                  <div class="flex items-center gap-2 shrink-0 ml-2">
+                    <span class="text-[11px] font-bold font-mono text-indigo-300">
+                      {{ getCategoryPercent(cat) }}%
+                    </span>
+                    <span class="font-mono text-slate-100 font-bold text-xs">
+                      {{ formatRupiah(cat.total) }}
+                    </span>
+                  </div>
+                </div>
+                <div class="w-full h-2 rounded-full bg-slate-900 overflow-hidden border border-slate-800/80">
+                  <div 
+                    :class="[
+                      'h-full rounded-full transition-all duration-700 ease-out', 
+                      cat.type === 'income' ? 'bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-400' : 'bg-gradient-to-r from-rose-600 via-rose-500 to-pink-400'
+                    ]"
+                    :style="{ width: `${getCategoryPercent(cat)}%` }"
+                  ></div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="space-y-4">
-            <div 
-              v-for="cat in stats?.category_breakdown" 
-              :key="cat.name" 
-              class="space-y-2 p-2.5 rounded-2xl hover:bg-slate-800/40 transition"
-            >
-              <div class="flex items-center justify-between text-xs">
-                <span class="font-medium text-slate-200 flex items-center gap-2 truncate">
-                  <span :class="['w-2 h-2 rounded-full shrink-0', cat.type === 'income' ? 'bg-emerald-400' : 'bg-rose-400']"></span>
-                  <span class="truncate">{{ cat.name }}</span>
-                </span>
-                <span class="font-mono text-slate-200 font-semibold shrink-0 ml-2">
-                  {{ formatRupiah(cat.total) }}
-                </span>
-              </div>
-              <div class="w-full h-2 rounded-full bg-slate-950 overflow-hidden border border-slate-800/80">
-                <div 
-                  :class="[
-                    'h-full rounded-full transition-all duration-500', 
-                    cat.type === 'income' ? 'bg-gradient-to-r from-emerald-600 to-emerald-400' : 'bg-gradient-to-r from-rose-600 to-rose-400'
-                  ]"
-                  :style="{ width: `${Math.min(100, Math.max(4, Math.round((cat.total / (stats?.summary?.total_income || stats?.summary?.total_expense || 1)) * 100)))}%` }"
-                ></div>
-              </div>
-            </div>
+          <!-- Bottom Micro Info -->
+          <div class="pt-3 border-t border-slate-800/60 flex items-center justify-between text-[11px] text-slate-400">
+            <span>Proporsi terhadap total kelompok</span>
+            <NuxtLink to="/transactions" class="text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1">
+              <span>Detail Akun</span>
+              <ArrowRight class="w-3 h-3" />
+            </NuxtLink>
           </div>
         </div>
       </div>
@@ -350,13 +511,15 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   AlertCircle,
-  RefreshCw
+  RefreshCw,
+  Table
 } from 'lucide-vue-next'
 
 const { fetchApi } = useApi()
 const stats = ref(null)
 const pending = ref(true)
 const error = ref(null)
+const chartViewMode = ref('chart')
 
 const profitMargin = computed(() => {
   const inc = stats.value?.summary?.total_income || 0
@@ -365,11 +528,63 @@ const profitMargin = computed(() => {
   return Math.round((net / inc) * 100)
 })
 
-const maxChartValue = computed(() => {
-  if (!stats.value?.monthly_chart?.length) return 10000000
+const chartYMax = computed(() => {
+  if (!stats.value?.monthly_chart?.length) return 20000000
   const vals = stats.value.monthly_chart.flatMap(m => [Number(m.income || 0), Number(m.expense || 0)])
-  return Math.max(...vals, 1000000)
+  const highest = Math.max(...vals, 1000000)
+  // Round up to nice clean ceiling (e.g. 20,000,000)
+  const magnitude = Math.pow(10, Math.floor(Math.log10(highest)))
+  return Math.ceil(highest / (magnitude / 2)) * (magnitude / 2) || 20000000
 })
+
+const formatMonthName = (monthStr) => {
+  if (!monthStr) return ''
+  const [year, month] = monthStr.split('-')
+  const monthNames = [
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+  ]
+  const idx = parseInt(month, 10) - 1
+  return `${monthNames[idx] || month} ${year}`
+}
+
+const formatCompactRupiah = (val) => {
+  if (val === null || val === undefined || isNaN(Number(val))) return 'Rp 0'
+  const num = Math.abs(Number(val))
+  const sign = Number(val) < 0 ? '-' : ''
+  if (num >= 1_000_000_000) {
+    return `${sign}Rp ${(num / 1_000_000_000).toFixed(1).replace('.0', '')} M`
+  }
+  if (num >= 1_000_000) {
+    return `${sign}Rp ${(num / 1_000_000).toFixed(1).replace('.0', '')} Jt`
+  }
+  if (num >= 1_000) {
+    return `${sign}Rp ${(num / 1_000).toFixed(0)} Rb`
+  }
+  return `${sign}Rp ${num}`
+}
+
+const monthlyStatsAverage = computed(() => {
+  const list = stats.value?.monthly_chart || []
+  if (!list.length) return { income: 0, expense: 0, net: 0 }
+  const totalInc = list.reduce((acc, curr) => acc + Number(curr.income || 0), 0)
+  const totalExp = list.reduce((acc, curr) => acc + Number(curr.expense || 0), 0)
+  const totalNet = list.reduce((acc, curr) => acc + Number(curr.net || 0), 0)
+  return {
+    income: Math.round(totalInc / list.length),
+    expense: Math.round(totalExp / list.length),
+    net: Math.round(totalNet / list.length)
+  }
+})
+
+const getCategoryPercent = (cat) => {
+  if (!cat || !cat.total) return 0
+  const base = cat.type === 'income' 
+    ? Number(stats.value?.summary?.total_income || 1)
+    : Number(stats.value?.summary?.total_expense || 1)
+  if (base <= 0) return 0
+  return Math.min(100, Math.max(2, Math.round((Number(cat.total) / base) * 100)))
+}
 
 const loadDashboard = async () => {
   pending.value = true
