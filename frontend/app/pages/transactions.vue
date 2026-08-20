@@ -111,6 +111,7 @@
           <table class="w-full text-left text-xs">
             <thead>
               <tr class="text-slate-400 border-b border-slate-800 uppercase font-semibold bg-slate-950/50">
+                <th class="py-4 px-6">#</th>
                 <th class="py-4 px-6">Tanggal</th>
                 <th class="py-4 px-6">COA Kode</th>
                 <th class="py-4 px-6">Nama Akun & Kategori</th>
@@ -121,7 +122,8 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-800/60 font-medium">
-              <tr v-for="tx in txStore.transactions" :key="tx.id" class="hover:bg-slate-800/40 transition group">
+              <tr v-for="(tx, index) in txStore.transactions" :key="tx.id" class="hover:bg-slate-800/40 transition group">
+                <td class="py-4 px-6 text-slate-300 font-mono whitespace-nowrap">{{ (txStore.pagination.currentPage - 1) * txStore.pagination.perPage + index + 1 }}</td>
                 <td class="py-4 px-6 text-slate-300 font-mono whitespace-nowrap">{{ tx.date }}</td>
                 <td class="py-4 px-6 font-mono text-indigo-400 font-bold text-sm whitespace-nowrap">
                   <span
