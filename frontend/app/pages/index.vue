@@ -156,7 +156,7 @@
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
         <div
-          class="lg:col-span-2 p-5 sm:p-7 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-2xl flex flex-col justify-between space-y-6 relative overflow-hidden backdrop-blur-sm">
+          class="lg:col-span-2 p-5 sm:p-7 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-2xl flex flex-col space-y-6 relative overflow-hidden backdrop-blur-sm">
           <div class="absolute -right-16 -top-16 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none">
           </div>
 
@@ -193,89 +193,15 @@
                   <span>Tabel</span>
                 </button>
               </div>
-
-              <div
-                class="hidden sm:flex items-center gap-3 text-xs font-semibold px-3 py-1.5 rounded-xl bg-slate-950/50 border border-slate-800/80">
-                <span class="flex items-center gap-1.5 text-emerald-400">
-                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></span> Income
-                </span>
-                <span class="flex items-center gap-1.5 text-rose-400">
-                  <span class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-sm shadow-rose-500/50"></span> Expense
-                </span>
-              </div>
             </div>
           </div>
 
           <div v-if="chartViewMode === 'chart'" class="space-y-6">
-            <div class="relative min-h-[260px] pt-6 pb-2 px-1 flex">
-              <div
-                class="flex flex-col justify-between text-[10px] font-mono text-slate-500 pr-3 select-none text-right w-14 shrink-0 pb-12">
-                <span>{{ formatCompactRupiah(chartYMax) }}</span>
-                <span>{{ formatCompactRupiah(chartYMax * 0.75) }}</span>
-                <span>{{ formatCompactRupiah(chartYMax * 0.5) }}</span>
-                <span>{{ formatCompactRupiah(chartYMax * 0.25) }}</span>
-                <span>Rp 0</span>
-              </div>
-
-              <div class="relative flex-1 flex flex-col justify-between">
-                <div class="absolute inset-x-0 top-0 h-full flex flex-col justify-between pointer-events-none pb-12">
-                  <div class="w-full border-b border-slate-800/60 border-dashed"></div>
-                  <div class="w-full border-b border-slate-800/40 border-dashed"></div>
-                  <div class="w-full border-b border-slate-800/40 border-dashed"></div>
-                  <div class="w-full border-b border-slate-800/40 border-dashed"></div>
-                  <div class="w-full border-b border-slate-700/80"></div>
-                </div>
-
-                <div class="relative z-10 flex items-end justify-around h-full gap-2 sm:gap-6 pb-2">
-                  <div v-for="(item, idx) in stats?.monthly_chart" :key="item.month"
-                    class="flex flex-1 flex-col items-center justify-end h-full group relative max-w-[170px]">
-                    <div class="w-full h-48 flex items-end justify-center gap-2 sm:gap-3.5 px-2">
-                      <div class="relative flex flex-col items-center h-full justify-end group/bar">
-                        <div
-                          class="absolute -top-7 opacity-0 group-hover/bar:opacity-100 transition-all duration-200 pointer-events-none z-30 px-2 py-0.5 rounded-lg bg-emerald-950 text-emerald-300 border border-emerald-500/40 text-[10px] font-mono font-bold whitespace-nowrap shadow-xl">
-                          +{{ formatRupiah(item.income) }}
-                        </div>
-                        <div
-                          class="w-6 sm:w-11 bg-gradient-to-t from-emerald-600 via-emerald-500 to-teal-400 rounded-t-xl transition-all duration-500 group-hover/bar:brightness-125 shadow-lg shadow-emerald-500/20 cursor-pointer relative overflow-hidden"
-                          :style="{ height: `${Math.max(6, Math.min(100, Math.round((Number(item.income || 0) / chartYMax) * 100)))}%` }">
-                          <div class="absolute inset-x-0 top-0 h-1.5 bg-emerald-200/40 rounded-t-xl"></div>
-                        </div>
-                      </div>
-
-                      <div class="relative flex flex-col items-center h-full justify-end group/bar">
-                        <div
-                          class="absolute -top-7 opacity-0 group-hover/bar:opacity-100 transition-all duration-200 pointer-events-none z-30 px-2 py-0.5 rounded-lg bg-rose-950 text-rose-300 border border-rose-500/40 text-[10px] font-mono font-bold whitespace-nowrap shadow-xl">
-                          -{{ formatRupiah(item.expense) }}
-                        </div>
-                        <div
-                          class="w-6 sm:w-11 bg-gradient-to-t from-rose-600 via-rose-500 to-pink-400 rounded-t-xl transition-all duration-500 group-hover/bar:brightness-125 shadow-lg shadow-rose-500/20 cursor-pointer relative overflow-hidden"
-                          :style="{ height: `${Math.max(6, Math.min(100, Math.round((Number(item.expense || 0) / chartYMax) * 100)))}%` }">
-                          <div class="absolute inset-x-0 top-0 h-1.5 bg-rose-200/40 rounded-t-xl"></div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="mt-3 text-center space-y-1 w-full">
-                      <p class="text-xs font-extrabold text-slate-200 tracking-wide">
-                        {{ formatMonthName(item.month) }}
-                      </p>
-                      <div :class="[
-                        'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold border transition',
-                        item.net >= 0
-                          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 group-hover:bg-emerald-500/20'
-                          : 'bg-rose-500/10 text-rose-400 border-rose-500/30 group-hover:bg-rose-500/20'
-                      ]" :title="`Net Cashflow: ${formatRupiah(item.net)}`">
-                        <TrendingUp v-if="item.net >= 0" class="w-3 h-3 text-emerald-400" />
-                        <TrendingDown v-else class="w-3 h-3 text-rose-400" />
-                        <span>{{ formatCompactRupiah(item.net) }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <div class="relative w-full h-[260px] sm:h-[320px] md:h-[360px]">
+              <Bar :data="chartData" :options="chartOptions" />
             </div>
 
-            <div class="grid grid-cols-3 gap-2 sm:gap-4 pt-3 border-t border-slate-800/80 text-center">
+            <div class="grid grid-cols-1 xs:grid-cols-3 sm:grid-cols-3 gap-2 sm:gap-4 pt-3 border-t border-slate-800/80 text-center">
               <div class="p-3 rounded-2xl bg-slate-950/60 border border-slate-800/80">
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rata-rata Pendapatan</p>
                 <p class="text-xs sm:text-sm font-mono font-extrabold text-emerald-400 mt-0.5">
@@ -296,9 +222,8 @@
               </div>
             </div>
           </div>
-
           <div v-else class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
+            <table class="w-full h-full text-left text-xs">
               <thead>
                 <tr class="text-slate-400 border-b border-slate-800 uppercase font-semibold bg-slate-950/60">
                   <th class="py-3 px-4 rounded-l-xl">Periode</th>
@@ -494,6 +419,20 @@ import {
   Table
 } from 'lucide-vue-next'
 
+// --- Chart.js ---
+import { Bar } from 'vue-chartjs'
+import {
+  Chart as ChartJS,
+  Title,
+  Tooltip,
+  Legend,
+  BarElement,
+  CategoryScale,
+  LinearScale
+} from 'chart.js'
+
+ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
+
 const { fetchApi } = useApi()
 const stats = ref(null)
 const pending = ref(true)
@@ -505,15 +444,6 @@ const profitMargin = computed(() => {
   const net = stats.value?.summary?.net_income || 0
   if (!inc) return 0
   return Math.round((net / inc) * 100)
-})
-
-const chartYMax = computed(() => {
-  if (!stats.value?.monthly_chart?.length) return 20000000
-  const vals = stats.value.monthly_chart.flatMap(m => [Number(m.income || 0), Number(m.expense || 0)])
-  const highest = Math.max(...vals, 1000000)
-  // Round up to nice clean ceiling (e.g. 20,000,000)
-  const magnitude = Math.pow(10, Math.floor(Math.log10(highest)))
-  return Math.ceil(highest / (magnitude / 2)) * (magnitude / 2) || 20000000
 })
 
 const formatMonthName = (monthStr) => {
@@ -564,6 +494,81 @@ const getCategoryPercent = (cat) => {
   if (base <= 0) return 0
   return Math.min(100, Math.max(2, Math.round((Number(cat.total) / base) * 100)))
 }
+
+// --- Chart.js: data & options (menggantikan bar chart manual) ---
+const chartData = computed(() => {
+  const list = stats.value?.monthly_chart || []
+  return {
+    labels: list.map(item => formatMonthName(item.month)),
+    datasets: [
+      {
+        label: 'Income',
+        data: list.map(item => Number(item.income || 0)),
+        backgroundColor: '#10b981', // emerald-500
+        hoverBackgroundColor: '#34d399',
+        borderRadius: 8,
+        maxBarThickness: 36
+      },
+      {
+        label: 'Expense',
+        data: list.map(item => Number(item.expense || 0)),
+        backgroundColor: '#f43f5e', // rose-500
+        hoverBackgroundColor: '#fb7185',
+        borderRadius: 8,
+        maxBarThickness: 36
+      }
+    ]
+  }
+})
+
+const chartOptions = computed(() => ({
+  responsive: true,
+  maintainAspectRatio: false,
+  interaction: { mode: 'index', intersect: false },
+  plugins: {
+    legend: {
+      display: true,
+      position: 'top',
+      align: 'end',
+      labels: {
+        color: '#cbd5e1', // slate-300
+        boxWidth: 10,
+        boxHeight: 10,
+        usePointStyle: true,
+        pointStyle: 'circle',
+        font: { size: 11, weight: 'bold' }
+      }
+    },
+    tooltip: {
+      backgroundColor: '#0f172a', // slate-900
+      borderColor: '#334155',
+      borderWidth: 1,
+      titleColor: '#f1f5f9',
+      bodyColor: '#cbd5e1',
+      padding: 10,
+      callbacks: {
+        label: (ctx) => `${ctx.dataset.label}: ${formatRupiah(ctx.raw)}`
+      }
+    }
+  },
+  scales: {
+    x: {
+      grid: { display: false },
+      ticks: {
+        color: '#94a3b8', // slate-400
+        font: { size: 10, weight: 'bold' }
+      }
+    },
+    y: {
+      grid: { color: 'rgba(148,163,184,0.12)' },
+      ticks: {
+        color: '#94a3b8',
+        font: { size: 10 },
+        callback: (val) => formatCompactRupiah(val)
+      }
+    }
+  }
+}))
 
 const loadDashboard = async () => {
   pending.value = true
