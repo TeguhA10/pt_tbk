@@ -81,9 +81,28 @@
               reportData?.months?.[reportData?.months?.length - 1] || 'Mar 2022' }}
           </p>
         </div>
-        <div class="flex items-center gap-2 self-start sm:self-auto">
-          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span class="text-xs font-semibold text-emerald-400">Live Auto-Calculated</span>
+        <div class="flex items-center gap-3 self-start sm:self-auto">
+          <!-- Filter Tahun -->
+          <div class="flex items-center gap-2">
+            <label class="text-xs font-semibold text-slate-400">
+              Tahun
+            </label>
+
+            <select v-model="filterYear" @change="fetchProfitLoss"
+              class="bg-slate-900 border border-slate-700 text-slate-200 text-xs font-semibold rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+              <option v-for="year in yearOptions" :key="year" :value="year">
+                {{ year }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Status -->
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="text-xs font-semibold text-emerald-400">
+              Live Auto-Calculated
+            </span>
+          </div>
         </div>
       </div>
 
@@ -103,7 +122,9 @@
                 Kategori Akun
               </th>
               <th v-for="month in reportData?.months" :key="month" class="py-4 px-6 text-right font-mono text-xs">
-                {{ month }}
+                <div class="min-w-[4rem]">
+                  {{ month }}
+                </div>
               </th>
             </tr>
           </thead>
@@ -214,6 +235,13 @@ const toast = useToast()
 
 const reportData = ref(null)
 const pending = ref(true)
+const filterYear = ref(new Date().getFullYear())
+
+const yearOptions = computed(() => {
+  const currentYear = new Date().getFullYear()
+
+  return Array.from({ length: 5 }, (_, index) => currentYear - index)
+})
 
 const overallIncome = computed(() => {
   if (!reportData.value?.total_income) return 0
@@ -235,9 +263,19 @@ const windowPrint = () => {
   }
 }
 
+const fetchProfitLoss = async () => {
+  const { data } = await useApi().get('/reports/profit-loss', {
+    params: {
+      year: filterYear.value
+    }
+  })
+
+  reportData.value = data
+}
+
 const loadReport = async () => {
   pending.value = true
-  const res = await fetchApi('/reports/profit-loss')
+  const res = await fetchApi('/reports/profit-loss', { param: { year: filterYear } })
   if (res.data) {
     reportData.value = res.data
   } else if (res.error) {
